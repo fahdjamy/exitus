@@ -7,25 +7,24 @@ import (
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
-	bindata "github.com/golang-migrate/migrate/v4/source/go_bindata"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/rs/zerolog/log"
 	"github.com/wolfeidau/exitus/migrations"
 )
 
-// NewMigrate load migrations
+// NewMigrate load migrations.
 func NewMigrate(db *sql.DB) *migrate.Migrate {
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to load driver")
 	}
 
-	s := bindata.Resource(migrations.AssetNames(), migrations.Asset)
-	d, err := bindata.WithInstance(s)
+	d, err := iofs.New(migrations.MigrationsFs, ".")
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to read assets from go-bindata")
+		log.Fatal().Err(err).Msg("failed to read assets from iofs")
 	}
 
-	m, err := migrate.NewWithInstance("go-bindata", d, "postgres", driver)
+	m, err := migrate.NewWithInstance("iofs", d, "postgres", driver)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to create migration from go-bindata")
 	}
@@ -36,7 +35,7 @@ func NewMigrate(db *sql.DB) *migrate.Migrate {
 	return m
 }
 
-// DoMigrate do sql migrations
+// DoMigrate do sql migrations.
 func DoMigrate(m *migrate.Migrate) (err error) {
 	err = m.Up()
 	if err == nil || err == migrate.ErrNoChange {

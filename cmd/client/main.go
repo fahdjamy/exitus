@@ -21,11 +21,11 @@ var (
 
 	auth = app.Flag("auth", "Use client credentials to authenticate to the api.").Required().Enum("clientcredentials")
 
-	// required if your using auth type "clientcredentials"
+	// required if your using auth type "clientcredentials".
 	clientID     = app.Flag("client-id", "oauth2 client id used with openid.").Envar("OAUTH_CLIENT_ID").String()
 	clientSecret = app.Flag("client-secret", "oauth2 client secret used with openid.").Envar("OAUTH_CLIENT_SECRET").String()
 
-	// openid authentication server
+	// openid authentication server.
 	authServer = app.Flag("openid-server", "OpenID authentication server URL.").Envar("OPENID_PROVIDER_URL").String()
 
 	listProjects = app.Command("projects", "List projects.")
@@ -65,14 +65,14 @@ func main() {
 	switch cmd {
 	case listProjects.FullCommand():
 
-		client := &api.Client{Server: *endpoint, Client: *sess.Client(context.TODO()), RequestEditor: nil}
+		client := &api.Client{Server: *endpoint, Client: sess.Client(context.TODO())}
 
 		res, err := client.Projects(context.TODO(), &api.ProjectsParams{})
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to list projects")
 		}
 
-		projectsRes, err := api.ParseprojectsResponse(res)
+		projectsRes, err := api.ParseProjectsResponse(res)
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to list projects")
 		}
@@ -81,6 +81,5 @@ func main() {
 		if projectsRes.StatusCode() != 200 {
 			log.Fatal().Err(err).Msg("failed to list projects")
 		}
-
 	}
 }
